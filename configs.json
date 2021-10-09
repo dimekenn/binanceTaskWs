@@ -1,0 +1,7 @@
+{
+  "port": ":9090",
+  "ws_url": "wss://stream.binance.com:9443/ws/btcusdt@depth",
+  "orders_in_book": 20,
+  "time_range": "1000ms"
+}
+
