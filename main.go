@@ -33,7 +33,6 @@ func main()  {
 	go service.BinanceWSService(cfg, errCh)
 
 	errCh <- app.Start(cfg.Port)
-
 	log.Fatalf("Terminated: %v", <-errCh)
 }
 
