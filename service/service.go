@@ -28,8 +28,14 @@ func BinanceWSService(cfg *configs.Config, errCh chan error)  {
 		}
 
 		//counting total price and total quantity
-		totalAsksPrice, totalAsksQuantity := totalCount(msg.Asks)
-		totalBidsPrice, totalBidsQuantity := totalCount(msg.Bids)
+		totalAsksPrice, totalAsksQuantity, askErr := totalCount(msg.Asks)
+		if askErr!=nil{
+			errCh <- askErr
+		}
+		totalBidsPrice, totalBidsQuantity, bidErr := totalCount(msg.Bids)
+		if bidErr != nil{
+			errCh <- bidErr
+		}
 
 
 		fmt.Println("order book id:",msg.LastUpdateId)
@@ -45,22 +51,24 @@ func BinanceWSService(cfg *configs.Config, errCh chan error)  {
 	}
 }
 
-func totalCount(arr []model.StrArr) (string, string)  {
+func totalCount(arr []model.StrArr) (string, string, error)  {
 	var totalPrice float64
 	var totalQuantity float64
 
 	for _, v := range arr{
 		priceF, priceErr := strconv.ParseFloat(v[0], 64)
 		if priceErr != nil{
-			log.Fatalf("cannot parse price: %v", priceErr)
+			log.Printf("cannot parse price: %v", priceErr)
+			return "", "", priceErr
 		}
 		quantityF, quantityErr := strconv.ParseFloat(v[1], 64)
 		if quantityErr != nil{
-			log.Fatalf("cannot parse quantity: %v", quantityErr)
+			log.Printf("cannot parse quantity: %v", quantityErr)
+			return "", "", quantityErr
 		}
 		totalPrice += priceF
 		totalQuantity += quantityF
 	}
 
-	return fmt.Sprintf("%f", totalPrice), fmt.Sprintf("%f", totalQuantity)
+	return fmt.Sprintf("%f", totalPrice), fmt.Sprintf("%f", totalQuantity), nil
 }
